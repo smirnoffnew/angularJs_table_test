@@ -1,6 +1,15 @@
+'use strict';
 class HomeController {
-  constructor() {
+  /*@ngInject*/
+  constructor(DataService) {
     this.name = 'home';
+      // DataService.getData().success(
+      //     (data, status, headers, config) => {
+      //       console.log('success', data);
+      // }).
+      // error( (data, status, headers, config) => {
+      //     console.log('error', data);
+      // });
   }
 }
 
