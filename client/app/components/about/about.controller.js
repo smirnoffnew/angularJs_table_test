@@ -1,4 +1,5 @@
 class AboutController {
+  /*@ngInject*/
   constructor() {
     this.name = 'about';
   }

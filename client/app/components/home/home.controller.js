@@ -3,13 +3,15 @@ class HomeController {
   /*@ngInject*/
   constructor(DataService) {
     this.name = 'home';
-      // DataService.getData().success(
-      //     (data, status, headers, config) => {
-      //       console.log('success', data);
-      // }).
-      // error( (data, status, headers, config) => {
-      //     console.log('error', data);
-      // });
+      DataService.getData()
+        .then(
+          (data, status, headers, config) => {
+            console.log('success', data);
+          },
+          (data, status, headers, config) => {
+              console.log('error', data);
+          }
+      );
   }
 }
 
