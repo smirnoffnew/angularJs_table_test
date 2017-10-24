@@ -4,6 +4,7 @@ class HomeController {
   constructor(DataService) {
     this.name = 'home';
     this.dataObject = {};
+
     this.tableIterableobject = [];
 
       DataService.getData()
@@ -56,6 +57,7 @@ class HomeController {
 
 
   setRowspan(inputData){
+      var _this = this;
 
       var mainCounter = 0;
       var indexClient = null;
@@ -63,14 +65,37 @@ class HomeController {
       var creditCardCounter = 0;
       var indexCreditCard = null;
       var creditCardFlag = true;
-      var _this = this;
+
+      var monthCounter = 0;
+      var indexMonth = null;
+      var monthFlag = true;
+
 
       inputData.forEach(function callback(item, index, array) {
           mainCounter++;
           creditCardCounter++;
+          monthCounter++;
+
+          if (item.type === 'month') {
+              if (monthFlag) {
+                  monthCounter = 1;
+                  indexMonth = index;
+                  monthFlag = false;
+              } else {
+                  _this.saveCreditRowSpan(indexMonth, monthCounter-1);
+                  monthCounter = 1;
+                  indexMonth = index;
+              }
+          }
 
 
           if (item.type === 'creditCard') {
+              if ( !monthFlag ){
+                  _this.saveCreditRowSpan(indexMonth, monthCounter-1);
+                  monthFlag = true;
+              }
+
+
               if (creditCardFlag) {
                   creditCardCounter = 1;
                   indexCreditCard = index;
@@ -83,6 +108,11 @@ class HomeController {
           }
 
           if (item.type === 'client'){
+              if ( !monthFlag ){
+                  _this.saveCreditRowSpan(indexMonth, monthCounter-1);
+                  monthFlag = true;
+              }
+
               if ( !creditCardFlag ){
                   _this.saveCreditRowSpan(indexCreditCard, creditCardCounter-1);
                   creditCardFlag = true;
@@ -102,6 +132,7 @@ class HomeController {
           if ( index+1 === array.length ){ //last element
               inputData[indexClient].rowspan = mainCounter;
               _this.saveCreditRowSpan(indexCreditCard, creditCardCounter);
+              _this.saveCreditRowSpan(indexMonth, monthCounter);
           }
 
       });
