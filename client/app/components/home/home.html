@@ -1,6 +1,7 @@
 <div class="container">
   <table class="table table-bordered table-dark">
     <caption>bank transaction table</caption>
+
     <thead>
       <tr>
         <th>Client​ ​ID</th>
@@ -13,13 +14,10 @@
     </thead>
 
     <tbody>
-
-    <tr ng-repeat="item in $ctrl.tableIterableobject ">
-        <td ng-if="item.type == 'row'" ng-repeat="rowItem  in item.value track by $index" >{{rowItem.value}}</td>
-        <td ng-if="item.type !== 'row'" rowspan="{{item.rowspan}}">{{item.value}}</td>
-    </tr>
-
-
+      <tr ng-repeat="item in $ctrl.tableIterableobject ">
+          <td ng-if="item.type == 'row'" ng-repeat="rowItem  in item.value track by $index" >{{rowItem.value}}</td>
+          <td ng-if="item.type !== 'row'" rowspan="{{item.rowspan}}">{{item.value}}</td>
+      </tr>
     </tbody>
   </table>
 

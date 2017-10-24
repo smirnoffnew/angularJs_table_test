@@ -21,8 +21,9 @@ class HomeController {
 
   }
 
-    saveCreditRowSpan(index, rowspan){
+    saveData(index, rowspan){
         this.tableIterableobject[index].rowspan = rowspan;
+        return false;
     }
 
     iter(inputData) {
@@ -68,7 +69,7 @@ class HomeController {
 
       var monthCounter = 0;
       var indexMonth = null;
-      var monthFlag = true;
+      var isSaveMonthData = false;
 
 
       inputData.forEach(function callback(item, index, array) {
@@ -77,23 +78,15 @@ class HomeController {
           monthCounter++;
 
           if (item.type === 'month') {
-              if (monthFlag) {
-                  monthCounter = 1;
-                  indexMonth = index;
-                  monthFlag = false;
-              } else {
-                  _this.saveCreditRowSpan(indexMonth, monthCounter-1);
-                  monthCounter = 1;
-                  indexMonth = index;
-              }
+              isSaveMonthData = isSaveMonthData ? !_this.saveData(indexMonth, monthCounter-1) : true;
+              monthCounter = 1;
+              indexMonth = index;
           }
 
 
           if (item.type === 'creditCard') {
-              if ( !monthFlag ){
-                  _this.saveCreditRowSpan(indexMonth, monthCounter-1);
-                  monthFlag = true;
-              }
+
+              isSaveMonthData ? !_this.saveData(indexMonth, monthCounter-1) : false;
 
 
               if (creditCardFlag) {
@@ -101,20 +94,17 @@ class HomeController {
                   indexCreditCard = index;
                   creditCardFlag = false;
               } else {
-                  _this.saveCreditRowSpan(indexCreditCard, creditCardCounter-1);
+                  _this.saveData(indexCreditCard, creditCardCounter-1);
                   creditCardCounter = 1;
                   indexCreditCard = index;
               }
           }
 
           if (item.type === 'client'){
-              if ( !monthFlag ){
-                  _this.saveCreditRowSpan(indexMonth, monthCounter-1);
-                  monthFlag = true;
-              }
+              isSaveMonthData ? !_this.saveData(indexMonth, monthCounter-1) : false;
 
               if ( !creditCardFlag ){
-                  _this.saveCreditRowSpan(indexCreditCard, creditCardCounter-1);
+                  _this.saveData(indexCreditCard, creditCardCounter-1);
                   creditCardFlag = true;
               }
 
@@ -131,8 +121,8 @@ class HomeController {
 
           if ( index+1 === array.length ){ //last element
               inputData[indexClient].rowspan = mainCounter;
-              _this.saveCreditRowSpan(indexCreditCard, creditCardCounter);
-              _this.saveCreditRowSpan(indexMonth, monthCounter);
+              _this.saveData(indexCreditCard, creditCardCounter);
+              _this.saveData(indexMonth, monthCounter);
           }
 
       });
