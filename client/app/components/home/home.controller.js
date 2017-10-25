@@ -22,9 +22,10 @@ class HomeController {
   }
 
     saveData(index, rowspan){
-        this.tableIterableobject[index].rowspan = rowspan;
+        typeof index === 'number' ?  this.tableIterableobject[index].rowspan = rowspan : false;
         return false;
     }
+
 
     iter(inputData) {
 
@@ -58,69 +59,53 @@ class HomeController {
 
 
   setRowspan(inputData){
+
       var _this = this;
 
-      var mainCounter = 0;
-      var indexClient = null;
+      var clientCounter = 0;
+      var indexClient = false;
 
       var creditCardCounter = 0;
-      var indexCreditCard = null;
-      var creditCardFlag = true;
+      var indexCreditCard = false;
 
       var monthCounter = 0;
-      var indexMonth = null;
-      var isSaveMonthData = false;
-
+      var indexMonth = false;
 
       inputData.forEach(function callback(item, index, array) {
-          mainCounter++;
+          clientCounter++;
           creditCardCounter++;
           monthCounter++;
 
           if (item.type === 'month') {
-              isSaveMonthData = isSaveMonthData ? !_this.saveData(indexMonth, monthCounter-1) : true;
-              monthCounter = 1;
+              _this.saveData(indexMonth, monthCounter-1);
+
               indexMonth = index;
+              monthCounter = 1;
           }
 
 
           if (item.type === 'creditCard') {
+              _this.saveData(indexMonth, monthCounter-1);
+              _this.saveData(indexCreditCard, creditCardCounter-1);
 
-              isSaveMonthData ? !_this.saveData(indexMonth, monthCounter-1) : false;
-
-
-              if (creditCardFlag) {
-                  creditCardCounter = 1;
-                  indexCreditCard = index;
-                  creditCardFlag = false;
-              } else {
-                  _this.saveData(indexCreditCard, creditCardCounter-1);
-                  creditCardCounter = 1;
-                  indexCreditCard = index;
-              }
-          }
-
-          if (item.type === 'client'){
-              isSaveMonthData ? !_this.saveData(indexMonth, monthCounter-1) : false;
-
-              if ( !creditCardFlag ){
-                  _this.saveData(indexCreditCard, creditCardCounter-1);
-                  creditCardFlag = true;
-              }
-
-              if ( indexClient === null ) {   //first element
-                  indexClient = index;
-
-              } else { //inside elements
-                  array[indexClient].rowspan = (indexClient === 0) ? mainCounter - 1 : mainCounter;
-                  mainCounter = 1;
-                  indexClient = index;
-              }
+              indexCreditCard = index;
+              creditCardCounter = 1;
           }
 
 
-          if ( index+1 === array.length ){ //last element
-              inputData[indexClient].rowspan = mainCounter;
+          if (item.type === 'client') {
+
+              _this.saveData(indexMonth, monthCounter-1);
+              _this.saveData(indexCreditCard, creditCardCounter-1);
+              _this.saveData(indexClient, clientCounter-1);
+
+              indexClient = index;
+              clientCounter = 1;
+          }
+
+          //if its last element
+          if ( index + 1 === array.length ){
+              _this.saveData(indexClient, clientCounter);
               _this.saveData(indexCreditCard, creditCardCounter);
               _this.saveData(indexMonth, monthCounter);
           }
