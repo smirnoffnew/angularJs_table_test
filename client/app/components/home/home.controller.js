@@ -5,12 +5,14 @@ class HomeController {
         this.name = 'home';
         this.dataObject = {};
         this.tableIterableobject = [];
+        this.keys=[];
         
         DataService.getData()
         .then(
             (response) => {
                 this.dataObject = response.data;
                 this.generateIterableObject( this.dataObject  );
+                this.getKeys( this.dataObject );
                 this.setRowspan(this.tableIterableobject);
             },
             
@@ -21,21 +23,27 @@ class HomeController {
     
     }
 
+    getKeys(data){
+        this.keys.push( Object.keys(data.records[0])[0]  );
+        this.keys.push( Object.keys(data.records[0][Object.keys(data.records[0])[1]][0])[0]  );
+        this.keys.push( Object.keys(data.records[0][Object.keys(data.records[0])[1]][0])[1]   );
+    }
+
 
     generateIterableObject(inputData) {
-    
-        inputData.records.forEach( (clientsData ) => {
-            this.tableIterableobject.push({type:'client', value:clientsData.clientId, rowspan:false});
-    
-            clientsData.creditCards.forEach( (creditCardData) => {
-                this.tableIterableobject.push({type:'creditCard', value:creditCardData.id, rowspan:false});
 
-                    for (let monthDataProp in creditCardData.monthsData) {
-                        this.tableIterableobject.push({type:'month', value:this.monthDateFormatter(monthDataProp), rowspan:false});
+        inputData[ Object.keys(inputData)[0] ].forEach( (clientsData ) => {
+            this.tableIterableobject.push({type:Object.keys(clientsData)[0], value:clientsData[Object.keys(clientsData)[0]] , rowspan:false});
 
-                        creditCardData.monthsData[monthDataProp].rows.forEach( (rowData)=>{
+            clientsData[Object.keys(clientsData)[1]].forEach( (creditCardData) => {
+                this.tableIterableobject.push({type:Object.keys(creditCardData)[0], value:creditCardData[Object.keys(creditCardData)[0] ], rowspan:false});
+
+                    for (let monthDataProp in creditCardData[Object.keys(creditCardData)[1]]) {
+                        this.tableIterableobject.push({type:Object.keys(creditCardData)[1], value:HomeController.monthDateFormatter(monthDataProp), rowspan:false});
+
+                        creditCardData[Object.keys(creditCardData)[1]][monthDataProp].rows.forEach( (rowData)=>{
                             let rows = [];
-                            rows.push({type:'row', value:this.timeFormatter(rowData.timeStamp), rowspan:1});
+                            rows.push({type:'row', value:HomeController.timeFormatter(rowData.timeStamp), rowspan:1});
                             rows.push({type:'row', value:rowData.type, rowspan:1});
                             rows.push({type:'row', value:rowData.amount, rowspan:1});
                             this.tableIterableobject.push({type:'row', value:rows, rowspan:1});
@@ -45,11 +53,62 @@ class HomeController {
         });
     }
 
-    timeFormatter(date){
+    setRowspan(inputData){
+        let clientCounter, creditCardCounter, monthCounter = 0;
+        let indexClient, indexCreditCard, indexMonth = false;
+
+        inputData.forEach( (item, index, array) => {
+            clientCounter++;
+            creditCardCounter++;
+            monthCounter++;
+
+            // monthsData
+            if (item.type === this.keys[2]) {
+                this.saveData(indexMonth, monthCounter-1);
+                indexMonth = index;
+                monthCounter = 1;
+            }
+
+            // id
+            if (item.type === this.keys[1]) {
+                this.saveData(indexMonth, monthCounter-1);
+                this.saveData(indexCreditCard, creditCardCounter-1);
+                indexCreditCard = index;
+                creditCardCounter = 1;
+            }
+
+            // clientId
+            if (item.type === this.keys[0]) {
+                this.saveData(indexMonth, monthCounter-1);
+                this.saveData(indexCreditCard, creditCardCounter-1);
+                this.saveData(indexClient, clientCounter-1);
+                indexClient = index;
+                clientCounter = 1;
+            }
+
+            //if its last element
+            if ( index + 1 === array.length ){
+                this.saveData(indexClient, clientCounter);
+                this.saveData(indexCreditCard, creditCardCounter);
+                this.saveData(indexMonth, monthCounter);
+            }
+
+        });
+
+    }
+
+
+    saveData(index, rowspan){
+        typeof index === 'number' ?  this.tableIterableobject[index].rowspan = rowspan : false;
+    }
+
+
+    static timeFormatter(date){
         return new Date(  Date.parse(date)  ).toUTCString().toString();
     }
 
-    monthDateFormatter(month) {
+
+    static monthDateFormatter(month) {
         switch (month) {
             case '1':
                 return 'January';
@@ -90,53 +149,6 @@ class HomeController {
             default:
                 return 'unknownMonthFormat'
         }
-    }
-
-
-    setRowspan(inputData){
-        let clientCounter, creditCardCounter, monthCounter = 0;
-        let indexClient, indexCreditCard, indexMonth = false;
-
-        inputData.forEach( (item, index, array) => {
-            clientCounter++;
-            creditCardCounter++;
-            monthCounter++;
-
-            if (item.type === 'month') {
-                this.saveData(indexMonth, monthCounter-1);
-                indexMonth = index;
-                monthCounter = 1;
-            }
-
-            if (item.type === 'creditCard') {
-                this.saveData(indexMonth, monthCounter-1);
-                this.saveData(indexCreditCard, creditCardCounter-1);
-                indexCreditCard = index;
-                creditCardCounter = 1;
-            }
-
-            if (item.type === 'client') {
-                this.saveData(indexMonth, monthCounter-1);
-                this.saveData(indexCreditCard, creditCardCounter-1);
-                this.saveData(indexClient, clientCounter-1);
-                indexClient = index;
-                clientCounter = 1;
-            }
-
-            //if its last element
-            if ( index + 1 === array.length ){
-                this.saveData(indexClient, clientCounter);
-                this.saveData(indexCreditCard, creditCardCounter);
-                this.saveData(indexMonth, monthCounter);
-            }
-
-        });
-
-    }
-
-
-    saveData(index, rowspan){
-        typeof index === 'number' ?  this.tableIterableobject[index].rowspan = rowspan : false;
     }
 }
 
